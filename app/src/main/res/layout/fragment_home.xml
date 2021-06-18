@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/smoke_gray">
+
+
+        <RelativeLayout
+            android:id="@+id/headerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/lnrTitle"
+                android:layout_width="match_parent"
+                android:layout_height="55dp">
+
+                <ImageView
+                    android:id="@+id/imgLogo"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:src="@drawable/logo" />
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_toRightOf="@id/imgLogo"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtLoginBy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_toRightOf="@id/imgLogo"
+                    android:layout_below="@id/title"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/imgLogout"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="20dp"
+                    app:srcCompat="@drawable/ic_logout" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/lnrTitle">
+
+
+                <com.ogaclejapan.smarttablayout.SmartTabLayout
+                    android:id="@+id/viewpagertab"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@color/colorPrimary"
+                    app:stl_clickable="true"
+                    app:stl_defaultTabBackground="?attr/selectableItemBackground"
+                    app:stl_defaultTabTextAllCaps="false"
+                    app:stl_defaultTabTextColor="@color/white"
+                    app:stl_defaultTabTextHorizontalPadding="10dp"
+                    app:stl_defaultTabTextMinWidth="0dp"
+                    app:stl_defaultTabTextSize="12sp"
+                    app:stl_distributeEvenly="false"
+                    app:stl_dividerColor="@color/white"
+                    app:stl_dividerThickness="0.5dp"
+                    app:stl_drawDecorationAfterTab="false"
+                    app:stl_indicatorAlwaysInCenter="false"
+                    app:stl_indicatorColor="@color/orange"
+                    app:stl_indicatorCornerRadius="15dp"
+                    app:stl_indicatorInFront="false"
+                    app:stl_indicatorInterpolation="smart"
+                    app:stl_indicatorThickness="3dp"
+                    app:stl_indicatorWidth="auto"
+                    app:stl_indicatorWithoutPadding="false"
+                    app:stl_overlineColor="@color/white"
+                    app:stl_overlineThickness="0dp"
+                    app:stl_titleOffset="24dp"
+                    app:stl_underlineColor="@color/white"
+                    app:stl_underlineThickness="1dp" />
+
+
+            </RelativeLayout>
+
+
+        </RelativeLayout>
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/headerView" />
+
+    </RelativeLayout>
+
+</layout>

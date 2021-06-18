@@ -1,0 +1,74 @@
+apply plugin: 'com.android.application'
+apply plugin: 'realm-android'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        applicationId "com.ab.invoicetracker"
+        minSdkVersion 22
+        targetSdkVersion 30
+        versionCode 2
+        versionName "1.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        buildTypes {
+            release {
+                debuggable false
+                minifyEnabled true
+                shrinkResources true
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            }
+
+        }
+    }
+
+    lintOptions {
+        quiet true
+        abortOnError false
+        ignoreWarnings true
+        checkReleaseBuilds false
+    }
+
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    api 'com.google.android.material:material:1.4.0-beta01'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    api 'com.squareup.retrofit2:retrofit:2.9.0'
+    api "com.splunk.mint:mint:5.0.0"
+    api 'com.squareup.retrofit2:converter-gson:2.9.0'
+    api 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
+    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
+    implementation 'com.onesignal:OneSignal:4.2.0'
+    api 'com.squareup.picasso:picasso:2.71828'
+    api 'de.hdodenhof:circleimageview:3.1.0'
+    api 'com.orhanobut:logger:2.2.0'
+    api 'com.karumi:dexter:5.0.0'
+    api 'io.github.inflationx:calligraphy3:3.1.1'
+    api 'io.github.inflationx:viewpump:2.0.3'
+    api 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
+    api 'com.github.GrenderG:Toasty:1.5.0'
+    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
