@@ -248,7 +248,7 @@ public class Camera2Fragment extends BaseFragment implements Callback,
                             loadedImage.getWidth(), loadedImage.getHeight(),
                             rotateMatrix, false);
                     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-                    rotatedBitmap.compress(CompressFormat.JPEG, 70, ostream);
+                    rotatedBitmap.compress(CompressFormat.JPEG, 50, ostream);
                     byte[] b = ostream.toByteArray();
                     String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
                     Intent intent = new Intent(AppUtils.CAMERA_SCREEN);

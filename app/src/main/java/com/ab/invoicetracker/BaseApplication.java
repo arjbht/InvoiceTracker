@@ -67,8 +67,8 @@ public class BaseApplication extends Application {
         Gson gson = gsonBuilder.create();
 
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
-                .readTimeout(60, TimeUnit.SECONDS)
-                .connectTimeout(60, TimeUnit.SECONDS);
+                .readTimeout(120, TimeUnit.SECONDS)
+                .connectTimeout(120, TimeUnit.SECONDS);
 
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -103,7 +103,9 @@ public class BaseApplication extends Application {
         }.getType(), RealmStringListTypeAdapter.INSTANCE);
 
         Gson gson = gsonBuilder.create();
-        OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+        OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
+                .readTimeout(120, TimeUnit.SECONDS)
+                .connectTimeout(120, TimeUnit.SECONDS);
 
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,19 @@ public class InvoiceDetailsFragment extends BaseFragment {
         mAdapter = new RecycleInvoiceDetailsAdapter(getActivity());
         mFragmentInvoiceDetailsBinding.recyclerView.setAdapter(mAdapter);
 
-        getSearchInvoice();
+        mFragmentInvoiceDetailsBinding.search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchInvoiceDetails(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        //getSearchInvoice();
 
 
     }
@@ -92,18 +105,7 @@ public class InvoiceDetailsFragment extends BaseFragment {
 
     private void getSearchInvoice() {
         try {
-            mFragmentInvoiceDetailsBinding.search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    searchInvoiceDetails(query);
-                    return false;
-                }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return false;
-                }
-            });
 
         } catch (Exception e) {
             e.printStackTrace();

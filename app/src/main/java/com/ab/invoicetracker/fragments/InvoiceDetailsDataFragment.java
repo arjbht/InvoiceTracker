@@ -7,32 +7,44 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ab.invoicetracker.BaseApplication;
 import com.ab.invoicetracker.BaseFragment;
+import com.ab.invoicetracker.BuildConfig;
 import com.ab.invoicetracker.R;
 import com.ab.invoicetracker.activities.Camera2Activity;
 import com.ab.invoicetracker.databinding.FragmentInvoiceDetailsDataBinding;
@@ -50,13 +62,20 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 
 import es.dmoral.toasty.Toasty;
 import io.realm.RealmResults;
 
+import static android.app.Activity.RESULT_OK;
+import static android.view.View.GONE;
 import static androidx.core.content.ContextCompat.getSystemService;
 
 public class InvoiceDetailsDataFragment extends BaseFragment implements FragmentDatePicker.onDatePickerListener {
@@ -74,8 +93,11 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
     public static final String ARGS_IMG = "ARGS_MG";
     public static final String ARGS_INQUEUE = "ARGS_INQUEUE";
     private File mPhotoFile;
+    private String selectedImagePath;
     private Bitmap bitmap;
+    private Bitmap selectedBmp;
     static final int REQUEST_TAKE_PHOTO = 1;
+    static final int REQUEST_GALLERY_PHOTO = 2;
     private String invoiceName = "";
     private String sfdcNo = "";
     private String region = "";
@@ -131,19 +153,20 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
             imgUrl = getArguments().getString(ARGS_IMG);
         }
         AppUtils.CAMERA_SCREEN = "INVOICE";
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver,
-                new IntentFilter(AppUtils.CAMERA_SCREEN));
+        /*LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(mMessageReceiver,
+                new IntentFilter(AppUtils.CAMERA_SCREEN));*/
     }
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    /*private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             String base64 = intent.getStringExtra("base64");
             uploadOnsiteImage(base64);
             Log.d("receiver", "Got message: " + base64);
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(mMessageReceiver);
         }
-    };
+    };*/
 
     private void uploadOnsiteImage(String base64) {
         try {
@@ -161,8 +184,10 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
                     try {
                         mFragmentInvoiceDetailsBinding.lnrUpload.setVisibility(View.GONE);
                         mFragmentInvoiceDetailsBinding.lnrImage.setVisibility(View.VISIBLE);
-                        Picasso.get().load(response.getFileUrl()).into(mFragmentInvoiceDetailsBinding.imgUploadedCheque);
+                        Picasso.get().load(response.getFileUrl()).fit().into(mFragmentInvoiceDetailsBinding.imgUploadedCheque);
                         imgUrl = response.getFileUrl();
+                        Log.d("TAG", imgUrl);
+                        //LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mMessageReceiver);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -197,7 +222,7 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
         if (imgUrl!=null &&!imgUrl.equals("")) {
             mFragmentInvoiceDetailsBinding.lnrUpload.setVisibility(View.GONE);
             mFragmentInvoiceDetailsBinding.lnrImage.setVisibility(View.VISIBLE);
-            Picasso.get().load(imgUrl).into(mFragmentInvoiceDetailsBinding.imgUploadedCheque);
+            Picasso.get().load(imgUrl).fit().into(mFragmentInvoiceDetailsBinding.imgUploadedCheque);
         }
 
         if( date!= null && !date.equals("")){
@@ -237,7 +262,8 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
         mFragmentInvoiceDetailsBinding.lnrUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                init();
+                //init();
+                pickImage();
             }
         });
         mFragmentInvoiceDetailsBinding.imageCancel.setOnClickListener(new View.OnClickListener() {
@@ -275,7 +301,7 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
                 DownloadManager manager1 = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
                 Objects.requireNonNull(manager1).enqueue(request1);
                 if (DownloadManager.STATUS_SUCCESSFUL == 8) {
-                    Toasty.success(getActivity(), "Download successfull", Toasty.LENGTH_SHORT).show();
+                    Toasty.success(getActivity(), "Download successful", Toasty.LENGTH_SHORT).show();
                 }
             }
         });
@@ -342,6 +368,16 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
         }
     }
 
+    /*private void pickImage() {
+        new CameraUtils().startCrop();
+
+        *//*CropImage.activity()
+                .setMinCropResultSize(400, 400)
+                .setMaxCropResultSize(3000, 3000)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(requireContext(), this);*//*
+    }*/
+
     private boolean isValidated() {
         if (mFragmentInvoiceDetailsBinding.edtDate.getText().toString().length() == 0) {
             Toasty.error(getActivity(), "Please select date!", Toasty.LENGTH_SHORT).show();
@@ -404,4 +440,201 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
         }
     }
 
+
+    private void pickImage() {
+
+        LayoutInflater li = LayoutInflater.from(getActivity());
+
+        View promptsView = li.inflate(R.layout.layout_choose_gallery_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+
+        alertDialogBuilder.setView(promptsView);
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+
+        final ImageView selectedImg =
+                promptsView.findViewById(R.id.selectedImg);
+        final LinearLayout lnrCamera =
+                promptsView.findViewById(R.id.lnrCamera);
+        final LinearLayout lnrGallery =
+                promptsView.findViewById(R.id.lnrGallery);
+        final TextView btn_cancel =
+                promptsView.findViewById(R.id.btnCancel);
+        final LinearLayout cardSelected = promptsView.findViewById(R.id.cardSelected);
+
+        int[] attrs = new int[]{R.attr.selectableItemBackground};
+        TypedArray typedArray = getActivity().obtainStyledAttributes(attrs);
+        int backgroundResource = typedArray.getResourceId(0, 0);
+        lnrCamera.setBackgroundResource(backgroundResource);
+        lnrGallery.setBackgroundResource(backgroundResource);
+
+        /*if (selectedBmp != null) {
+            cardSelected.setVisibility(View.VISIBLE);
+            Glide.with(getActivity())
+                    .load(selectedBmp)
+                    .error(android.R.drawable.stat_notify_error)
+                    .into(selectedImg);
+        } else {
+            cardSelected.setVisibility(GONE);
+        }*/
+
+        cardSelected.setOnClickListener(view -> {
+            if (selectedBmp != null) {
+                alertDialog.dismiss();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                selectedBmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] b = baos.toByteArray();
+                String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+                uploadOnsiteImage(encodedImage);
+            }
+        });
+        lnrCamera.setOnClickListener(view -> {
+            requestStoragePermission(true);
+            alertDialog.dismiss();
+        });
+
+        lnrGallery.setOnClickListener(view -> {
+            requestStoragePermission(false);
+            alertDialog.dismiss();
+        });
+
+        btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
+    }
+
+    private void requestStoragePermission(boolean isCamera) {
+        try {
+            Dexter.withActivity(getActivity())
+                    .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            // check if all permissions are granted
+                            if (report.areAllPermissionsGranted()) {
+                                if (isCamera) {
+                                    dispatchTakePictureIntent();
+                                } else {
+                                    dispatchGalleryIntent();
+                                }
+                            }
+                            // check for permanent denial of any permission
+                            if (report.isAnyPermissionPermanentlyDenied()) {
+                                // show alert dialog navigating to Settings
+                                showSettingsDialog();
+                            }
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions,
+                                                                       PermissionToken token) {
+                            token.continuePermissionRequest();
+                        }
+                    })
+                    .withErrorListener(
+                            error -> Toast.makeText(getActivity(), "Error occurred! ", Toast.LENGTH_SHORT)
+                                    .show())
+                    .onSameThread()
+                    .check();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        try {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+                // Create the File where the photo should go
+                File photoFile = null;
+                try {
+                    photoFile = createImageFile();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    // Error occurred while creating the File
+                }
+                if (photoFile != null) {
+                    Uri photoURI = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".provider", photoFile);
+                    mPhotoFile = photoFile;
+                    takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING", Camera.CameraInfo.CAMERA_FACING_BACK);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    private void dispatchGalleryIntent() {
+        try {
+            Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickPhoto.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(pickPhoto, REQUEST_GALLERY_PHOTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String mFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File mFile = File.createTempFile(mFileName, ".jpg", storageDir);
+        return mFile;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_TAKE_PHOTO) {
+                //images.add(mPhotoFile.getPath());
+                //imgFile = new File(mPhotoFile.getPath());
+                selectedImagePath = mPhotoFile.getPath();
+                if (selectedImagePath != null) {
+                    Bitmap bit = new BitmapDrawable(getActivity().getResources(), selectedImagePath).getBitmap();
+                    int i = (int) (bit.getHeight() * (1024.0 / bit.getWidth()));
+                    bitmap = Bitmap.createScaledBitmap(bit, 1024, i, true);
+                    selectedBmp = bitmap;
+                }
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                byte[] b = baos.toByteArray();
+                String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+                uploadOnsiteImage(encodedImage);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    private void showSettingsDialog() {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Need Permissions");
+            builder.setMessage(
+                    "This app needs permission to use this feature. You can grant them in app settings.");
+            builder.setPositiveButton("GOTO SETTINGS", (dialog, which) -> {
+                dialog.cancel();
+                openSettings();
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            builder.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openSettings() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, 101);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

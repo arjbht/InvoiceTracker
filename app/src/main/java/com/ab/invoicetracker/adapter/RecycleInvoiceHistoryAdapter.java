@@ -60,7 +60,7 @@ public class RecycleInvoiceHistoryAdapter extends RecyclerView.Adapter<RecycleIn
             holder.mItemRecyclerInvoiceHistoryBinding.txtRegion.setText(items.get(position).getAccountR().getInvoiceBillingRegionC());
             holder.mItemRecyclerInvoiceHistoryBinding.txtInvNo.setText(items.get(position).getSFDCInvoiceNumberC());
             if (items.get(position).getInvoiceSubmissionImageC() != null) {
-                Picasso.get().load(items.get(holder.getAdapterPosition()).getInvoiceSubmissionImageC()).into(holder.mItemRecyclerInvoiceHistoryBinding.imgInvoice);
+                Picasso.get().load(items.get(holder.getAdapterPosition()).getInvoiceSubmissionImageC()).fit().into(holder.mItemRecyclerInvoiceHistoryBinding.imgInvoice);
                 holder.mItemRecyclerInvoiceHistoryBinding.imgInvoicePlaceHolder.setVisibility(View.GONE);
             } else {
                 holder.mItemRecyclerInvoiceHistoryBinding.imgInvoicePlaceHolder.setVisibility(View.VISIBLE);

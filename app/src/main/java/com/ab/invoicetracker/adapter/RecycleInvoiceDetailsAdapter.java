@@ -31,7 +31,7 @@ public class RecycleInvoiceDetailsAdapter extends RecyclerView.Adapter<RecycleIn
 
     private OnListItemClickHandler onItemClickHandler;
     private final Context mContext;
-    private static List<InvoiceHistoryData> items = null;
+    private List<InvoiceHistoryData> items = null;
 
     public RecycleInvoiceDetailsAdapter(Context context) {
         if (items == null) {
@@ -60,7 +60,7 @@ public class RecycleInvoiceDetailsAdapter extends RecyclerView.Adapter<RecycleIn
             holder.mItemRecyclerInvoiceDetailsBinding.txtSfdcNo.setText(items.get(position).getName());
             holder.mItemRecyclerInvoiceDetailsBinding.txtRegion.setText(items.get(position).getAccountR().getInvoiceBillingRegionC());
             if (items.get(position).getInvoiceSubmissionImageC() != null) {
-                Picasso.get().load(items.get(holder.getAdapterPosition()).getInvoiceSubmissionImageC()).into(holder.mItemRecyclerInvoiceDetailsBinding.imgInvoice);
+                Picasso.get().load(items.get(holder.getAdapterPosition()).getInvoiceSubmissionImageC()).fit().into(holder.mItemRecyclerInvoiceDetailsBinding.imgInvoice);
                 holder.mItemRecyclerInvoiceDetailsBinding.imgInvoicePlaceHolder.setVisibility(View.GONE);
             } else {
                 holder.mItemRecyclerInvoiceDetailsBinding.imgInvoicePlaceHolder.setVisibility(View.VISIBLE);
@@ -68,7 +68,9 @@ public class RecycleInvoiceDetailsAdapter extends RecyclerView.Adapter<RecycleIn
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onItemClickHandler.onItemClick(position);
+                    if (onItemClickHandler != null) {
+                        onItemClickHandler.onItemClick(position);
+                    }
                 }
             });
             if (items.get(position).getInvoice_Submission_Synced__c() && items.get(position).getInvoiceSubmissionVerifiedC() && items.get(position).getWrongInvoiceSubmissionC()) {
