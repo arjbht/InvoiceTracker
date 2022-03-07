@@ -31,7 +31,7 @@ public class RecycleInvoiceHistoryAdapter extends RecyclerView.Adapter<RecycleIn
 
     private OnListItemClickHandler onItemClickHandler;
     private final Context mContext;
-    private static List<InvoiceHistoryData> items = null;
+    private List<InvoiceHistoryData> items = null;
 
     public RecycleInvoiceHistoryAdapter(Context context) {
         if (items == null) {
@@ -53,7 +53,7 @@ public class RecycleInvoiceHistoryAdapter extends RecyclerView.Adapter<RecycleIn
     @Override
     public void onBindViewHolder(@NotNull final RecycleInvoiceHistoryAdapter.ViewHolder holder, final int position) {
         try {
-            holder.mItemRecyclerInvoiceHistoryBinding.txtName.setText(items.get(position).getAccountR().getName());
+            holder.mItemRecyclerInvoiceHistoryBinding.txtName.setText(items.get(position).getAccountR().getName()+"");
             holder.mItemRecyclerInvoiceHistoryBinding.txtName.setTypeface(holder.mItemRecyclerInvoiceHistoryBinding.txtName.getTypeface(), Typeface.BOLD);
             holder.mItemRecyclerInvoiceHistoryBinding.txtNetCost.setText("₹ " + items.get(position).getNetCostC());
             holder.mItemRecyclerInvoiceHistoryBinding.txtSfdcNo.setText(items.get(position).getName());

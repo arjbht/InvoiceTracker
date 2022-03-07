@@ -74,7 +74,9 @@ public class InvoiceDetailsFragment extends BaseFragment {
         mFragmentInvoiceDetailsBinding.search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchInvoiceDetails(query);
+                if (!query.isEmpty()){
+                    searchInvoiceDetails(query);
+                }
                 return false;
             }
 
@@ -153,8 +155,12 @@ public class InvoiceDetailsFragment extends BaseFragment {
     }
 
     public void refresh() {
-        if (!mFragmentInvoiceDetailsBinding.search.getQuery().toString().equals("")) {
-            searchInvoiceDetails(mFragmentInvoiceDetailsBinding.search.getQuery().toString());
+        try{
+            if (!mFragmentInvoiceDetailsBinding.search.getQuery().toString().trim().equals("")) {
+                searchInvoiceDetails(mFragmentInvoiceDetailsBinding.search.getQuery().toString());
+            }
+        }catch (Exception e){
+            Log.d("TAG", "Refresh issue");
         }
     }
 
