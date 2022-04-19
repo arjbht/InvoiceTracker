@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -61,11 +63,14 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.squareup.picasso.Picasso;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -313,7 +318,12 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
             }
         });
 
-
+        mFragmentInvoiceDetailsBinding.imgUploadedCheque.setOnClickListener(v -> {
+            new StfalconImageViewer.Builder<>(requireContext(), Collections.singletonList(imgUrl), (imageView, image) -> {
+                //load your image here
+                Picasso.get().load(image).fit().into(imageView);
+            }).show();
+        });
     }
 
     private void showDatePicker() {
@@ -587,6 +597,22 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
         return mFile;
     }
 
+    private String getRealPathFromUri(Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = getActivity().getContentResolver().query(contentUri, proj, null, null, null);
+            assert cursor != null;
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -602,6 +628,22 @@ public class InvoiceDetailsDataFragment extends BaseFragment implements Fragment
                 }
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                byte[] b = baos.toByteArray();
+                String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+                uploadOnsiteImage(encodedImage);
+            } else if (requestCode == REQUEST_GALLERY_PHOTO) {
+                Uri selectedImage = data.getData();
+                mPhotoFile = new File(getRealPathFromUri(selectedImage));
+                selectedImagePath = mPhotoFile.getPath();
+                if (selectedImagePath != null) {
+                    Bitmap bit = new BitmapDrawable(getActivity().getResources(),
+                            selectedImagePath).getBitmap();
+                    int i = (int) (bit.getHeight() * (1024.0 / bit.getWidth()));
+                    bitmap = Bitmap.createScaledBitmap(bit, 1024, i, true);
+                    selectedBmp = bitmap;
+                }
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 byte[] b = baos.toByteArray();
                 String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
                 uploadOnsiteImage(encodedImage);
